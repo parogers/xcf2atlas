@@ -26,7 +26,7 @@ import re
 def get_layer_info(src):
     """Returns a list of layers found in the XCF file."""
 
-    Layer = namedtuple("layer", ("name", "x", "y", "w", "h"))
+    Layer = namedtuple('Layer', ('name', 'x', 'y', 'w', 'h'))
 
     proc = subprocess.Popen(["xcfinfo", src], stdout=subprocess.PIPE)
     (out, err) = proc.communicate()
@@ -44,7 +44,7 @@ def get_layer_info(src):
 
 def extract_layer(src, layer_name):
     proc = subprocess.Popen(
-        ["xcf2png", src, layer_name], 
+        ['xcf2png', '-C', src, layer_name], 
         stdout=subprocess.PIPE
     )
     out, err = proc.communicate()

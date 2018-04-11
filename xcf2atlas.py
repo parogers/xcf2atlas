@@ -75,9 +75,13 @@ if __name__ == '__main__':
     parser.add_argument('--image', dest="image_file", nargs=1, required=True)
     parser.add_argument('--json', dest="json_file", nargs=1, required=True)
     parser.add_argument('--max-width', dest="max_width", 
-                        nargs=1, type=int, default=256)
+                        nargs=1, type=int, default=[256])
     parser.add_argument('src', nargs='+')
     args = parser.parse_args(sys.argv[1:])
+
+    for src in args.src:
+        if not os.path.exists(src):
+            raise FileNotFoundError(src)
 
     sprite_names = {}
     all_layers = []
@@ -95,13 +99,17 @@ if __name__ == '__main__':
             for layer in layers
         })
 
-    dest, positions = pack_images(all_images, args.max_width[0])
-    dest.save(args.image_file[0])
+    dest_json_path = args.json_file[0]
+    dest_image_path = args.image_file[0]
 
+    # Pack and save the image
+    dest_img, positions = pack_images(all_images, args.max_width[0])
+    dest_img.save(dest_image_path)
+
+    # Write out the json
     json_data = {
-        'frames' : [
-            {
-                'filename' : sprite_names[layer],
+        'frames' : {
+            sprite_names[layer] : {
                 'frame' : {
                     'x' : pos[0], 
                     'y' : pos[1], 
@@ -120,6 +128,17 @@ if __name__ == '__main__':
                 'pivot' : {'x' : 0.5, 'y' : 0.5}
             } 
             for layer, pos in zip(all_layers, positions)
-        ]
+        },
+
+        'meta' : {
+            "app" : "xcf2atlas",
+            "version" : "1",
+            "image" : os.path.basename(dest_image_path),
+            "format" : "RGBA8888",
+            "size" : {
+                "W" : dest_img.size[0],
+                "h" : dest_img.size[1]},
+            "scale" : "1"
+        }
     }
-    json.dump(json_data, open(args.json_file[0], "w"))
+    json.dump(json_data, open(dest_json_path, "w"))
