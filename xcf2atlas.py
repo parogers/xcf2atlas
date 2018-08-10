@@ -75,7 +75,7 @@ if __name__ == '__main__':
     parser.add_argument('--image', dest="image_file", nargs=1, required=True)
     parser.add_argument('--json', dest="json_file", nargs=1, required=True)
     parser.add_argument('--max-width', dest="max_width", 
-                        nargs=1, type=int, default=256)
+                        nargs=1, type=int, default=[256])
     parser.add_argument('src', nargs='+')
     args = parser.parse_args(sys.argv[1:])
 
