@@ -44,7 +44,7 @@ def get_layer_info(src):
 
 def extract_layer(src, layer_name):
     proc = subprocess.Popen(
-        ["xcf2png", src, layer_name], 
+        ["xcf2png", '-C', src, layer_name], 
         stdout=subprocess.PIPE
     )
     out, err = proc.communicate()

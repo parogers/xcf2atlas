@@ -95,13 +95,50 @@ if __name__ == '__main__':
             for layer in layers
         })
 
+    dest_path = args.image_file[0]
     dest, positions = pack_images(all_images, args.max_width[0])
-    dest.save(args.image_file[0])
+    dest.save(dest_path)
+
+
+    #json_data = {
+    #    'frames' : [
+    #        {
+    #            'filename' : sprite_names[layer],
+    #            'frame' : {
+    #                'x' : pos[0], 
+    #                'y' : pos[1], 
+    #                'w' : layer.w, 
+    #                'h' : layer.h
+    #            },
+    #            'rotated' : False,
+    #            'trimmed' : False,
+    #            'spriteSourceSize' : {
+    #                'x' : 0, 
+    #                'y' : 0, 
+    #                'w' : layer.w, 
+    #                'h' : layer.h
+    #            },
+    #            'sourceSize' : {'w' : layer.w, 'h' : layer.h},
+    #            'pivot' : {'x' : 0.5, 'y' : 0.5}
+    #        } 
+    #        for layer, pos in zip(all_layers, positions)
+    #    ]
+    #}
 
     json_data = {
-        'frames' : [
-            {
-                'filename' : sprite_names[layer],
+        'meta' : {
+            'format' : 'RGBA8888',
+            'image' : os.path.basename(dest_path),
+            'app' : 'xcf2atlas',
+            'scale' : '1',
+            'verison' : '1',
+            'size' : {
+                'w' : dest.size[0],
+                'h' : dest.size[1],
+            }
+        },
+        'frames' : {
+            sprite_names[layer] : {
                 'frame' : {
                     'x' : pos[0], 
                     'y' : pos[1], 
@@ -118,8 +155,8 @@ if __name__ == '__main__':
                 },
                 'sourceSize' : {'w' : layer.w, 'h' : layer.h},
                 'pivot' : {'x' : 0.5, 'y' : 0.5}
-            } 
+            }
             for layer, pos in zip(all_layers, positions)
-        ]
+        }
     }
     json.dump(json_data, open(args.json_file[0], "w"))
