@@ -108,6 +108,17 @@ if __name__ == '__main__':
 
     # Write out the json
     json_data = {
+        'meta' : {
+            'format' : 'RGBA8888',
+            'image' : os.path.basename(dest_path),
+            'app' : 'xcf2atlas',
+            'scale' : '1',
+            'verison' : '1',
+            'size' : {
+                'w' : dest.size[0],
+                'h' : dest.size[1],
+            }
+        },
         'frames' : {
             sprite_names[layer] : {
                 'frame' : {
@@ -126,19 +137,8 @@ if __name__ == '__main__':
                 },
                 'sourceSize' : {'w' : layer.w, 'h' : layer.h},
                 'pivot' : {'x' : 0.5, 'y' : 0.5}
-            } 
+            }
             for layer, pos in zip(all_layers, positions)
-        },
-
-        'meta' : {
-            "app" : "xcf2atlas",
-            "version" : "1",
-            "image" : os.path.basename(dest_image_path),
-            "format" : "RGBA8888",
-            "size" : {
-                "W" : dest_img.size[0],
-                "h" : dest_img.size[1]},
-            "scale" : "1"
         }
     }
     json.dump(json_data, open(dest_json_path, "w"))
