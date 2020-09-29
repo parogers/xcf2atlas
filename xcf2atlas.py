@@ -147,4 +147,4 @@ if __name__ == '__main__':
             for layer, pos in zip(all_layers, positions)
         }
     }
-    json.dump(json_data, open(dest_json_path, 'w'))
+    json.dump(json_data, open(dest_json_path, 'w'), sort_keys=True)
