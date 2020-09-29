@@ -27,9 +27,9 @@ from collections import namedtuple
 import xcftools
 
 def place_images(img_list, max_width, pad=1):
-    """Packs the list of images into a box, given it's maximum width, expanding
+    '''Packs the list of images into a box, given it's maximum width, expanding
     the height as necessary to fit all images. This returns a list of placed
-    images."""
+    images.'''
     PlacedImage = namedtuple('PlacedImage', ('img', 'x', 'y'))
 
     x = pad
@@ -56,14 +56,14 @@ def place_images(img_list, max_width, pad=1):
     return placed_imgs, dest_width, dest_height
 
 def pack_images(img_list, max_width):
-    """Pack the list of PIL images into a new image, being somewhat space
-    efficient. This returns the new image, and a list of locations."""
+    '''Pack the list of PIL images into a new image, being somewhat space
+    efficient. This returns the new image, and a list of locations.'''
 
     # First decide on how to layout the images
     placed_imgs, dest_width, dest_height = place_images(img_list, max_width)
 
     # Now paste everything into a big image map
-    dest_img = PIL.Image.new("RGBA", (dest_width, dest_height))
+    dest_img = PIL.Image.new('RGBA', (dest_width, dest_height))
     for placed in placed_imgs:
         dest_img.paste(placed.img, (placed.x, placed.y))
 
@@ -71,11 +71,17 @@ def pack_images(img_list, max_width):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Build an image atlas from a collection of XCF files')
-    parser.add_argument('--image', dest="image_file", nargs=1, required=True)
-    parser.add_argument('--json', dest="json_file", nargs=1, required=True)
-    parser.add_argument('--max-width', dest="max_width", 
-                        nargs=1, type=int, default=[256])
+        description='Build an image atlas from a collection of XCF files'
+    )
+    parser.add_argument(
+        '--max-width',
+        dest='max_width',
+        nargs=1,
+        type=int,
+        default=[256]
+    )
+    parser.add_argument('--export-image', dest='image_file', nargs=1, required=True)
+    parser.add_argument('--export-json', dest='json_file', nargs=1, required=True)
     parser.add_argument('src', nargs='+')
     args = parser.parse_args(sys.argv[1:])
 
@@ -95,7 +101,7 @@ if __name__ == '__main__':
         ]
         base_name = os.path.splitext(os.path.basename(src))[0]
         sprite_names.update({
-            layer : base_name + "_" + layer.name
+            layer : base_name + '_' + layer.name
             for layer in layers
         })
 
@@ -110,29 +116,29 @@ if __name__ == '__main__':
     json_data = {
         'meta' : {
             'format' : 'RGBA8888',
-            'image' : os.path.basename(dest_path),
+            'image' : os.path.basename(dest_image_path),
             'app' : 'xcf2atlas',
             'scale' : '1',
             'verison' : '1',
             'size' : {
-                'w' : dest.size[0],
-                'h' : dest.size[1],
+                'w' : dest_img.size[0],
+                'h' : dest_img.size[1],
             }
         },
         'frames' : {
             sprite_names[layer] : {
                 'frame' : {
-                    'x' : pos[0], 
-                    'y' : pos[1], 
-                    'w' : layer.w, 
+                    'x' : pos[0],
+                    'y' : pos[1],
+                    'w' : layer.w,
                     'h' : layer.h
                 },
                 'rotated' : False,
                 'trimmed' : False,
                 'spriteSourceSize' : {
-                    'x' : 0, 
-                    'y' : 0, 
-                    'w' : layer.w, 
+                    'x' : 0,
+                    'y' : 0,
+                    'w' : layer.w,
                     'h' : layer.h
                 },
                 'sourceSize' : {'w' : layer.w, 'h' : layer.h},
@@ -141,4 +147,4 @@ if __name__ == '__main__':
             for layer, pos in zip(all_layers, positions)
         }
     }
-    json.dump(json_data, open(dest_json_path, "w"))
+    json.dump(json_data, open(dest_json_path, 'w'), sort_keys=True)
