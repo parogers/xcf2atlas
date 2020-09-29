@@ -71,11 +71,17 @@ def pack_images(img_list, max_width):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Build an image atlas from a collection of XCF files')
-    parser.add_argument('--image', dest='image_file', nargs=1, required=True)
-    parser.add_argument('--json', dest='json_file', nargs=1, required=True)
-    parser.add_argument('--max-width', dest='max_width',
-                        nargs=1, type=int, default=[256])
+        description='Build an image atlas from a collection of XCF files'
+    )
+    parser.add_argument(
+        '--max-width',
+        dest='max_width',
+        nargs=1,
+        type=int,
+        default=[256]
+    )
+    parser.add_argument('--export-image', dest='image_file', nargs=1, required=True)
+    parser.add_argument('--export-json', dest='json_file', nargs=1, required=True)
     parser.add_argument('src', nargs='+')
     args = parser.parse_args(sys.argv[1:])
 
