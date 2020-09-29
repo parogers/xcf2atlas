@@ -74,7 +74,7 @@ if __name__ == '__main__':
         description='Build an image atlas from a collection of XCF files')
     parser.add_argument('--image', dest="image_file", nargs=1, required=True)
     parser.add_argument('--json', dest="json_file", nargs=1, required=True)
-    parser.add_argument('--max-width', dest="max_width", 
+    parser.add_argument('--max-width', dest="max_width",
                         nargs=1, type=int, default=[256])
     parser.add_argument('src', nargs='+')
     args = parser.parse_args(sys.argv[1:])
@@ -110,29 +110,29 @@ if __name__ == '__main__':
     json_data = {
         'meta' : {
             'format' : 'RGBA8888',
-            'image' : os.path.basename(dest_path),
+            'image' : os.path.basename(dest_image_path),
             'app' : 'xcf2atlas',
             'scale' : '1',
             'verison' : '1',
             'size' : {
-                'w' : dest.size[0],
-                'h' : dest.size[1],
+                'w' : dest_img.size[0],
+                'h' : dest_img.size[1],
             }
         },
         'frames' : {
             sprite_names[layer] : {
                 'frame' : {
-                    'x' : pos[0], 
-                    'y' : pos[1], 
-                    'w' : layer.w, 
+                    'x' : pos[0],
+                    'y' : pos[1],
+                    'w' : layer.w,
                     'h' : layer.h
                 },
                 'rotated' : False,
                 'trimmed' : False,
                 'spriteSourceSize' : {
-                    'x' : 0, 
-                    'y' : 0, 
-                    'w' : layer.w, 
+                    'x' : 0,
+                    'y' : 0,
+                    'w' : layer.w,
                     'h' : layer.h
                 },
                 'sourceSize' : {'w' : layer.w, 'h' : layer.h},
