@@ -1,0 +1,6 @@
+[alias]
+	st = status
+	lg = log --graph --oneline --decorate
+	lgm = log --merges --oneline --decorate
+	bl = for-each-ref --sort=-committerdate refs/heads --format='%(committerdate:relative) %(refname:short)'
+	blr = for-each-ref --sort=-committerdate refs/remotes --format='%(committerdate:relative) %(refname:short)'

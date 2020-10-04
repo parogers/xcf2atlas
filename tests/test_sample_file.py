@@ -51,3 +51,25 @@ def test_it_exports_image_and_json_files():
 
         assert file_contents_match(img_path, check_img_path)
         assert file_contents_match(json_path, check_json_path)
+
+def test_it_wraps_output_image_given_max_width():
+    check_img_path = os.path.join(DATA_PATH, 'sample-export-with-max-width-40', 'out.png')
+    check_json_path = os.path.join(DATA_PATH, 'sample-export-with-max-width-40', 'out.json')
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        img_path = os.path.join(tmpdir, 'out.png')
+        json_path = os.path.join(tmpdir, 'out.json')
+        ret = run_xcf2atlas([
+            '--export-image', img_path,
+            '--export-json', json_path,
+            '--max-width', str(40),
+            SAMPLE_PATH,
+        ])
+
+        assert ret == 0
+
+        assert os.path.exists(img_path)
+        assert os.path.exists(json_path)
+
+        assert file_contents_match(img_path, check_img_path)
+        assert file_contents_match(json_path, check_json_path)
