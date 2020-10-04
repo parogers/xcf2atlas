@@ -20,16 +20,13 @@ import tempfile
 import subprocess
 import os
 
+from utils import (
+    run_xcf2atlas,
+    file_contents_match,
+)
+
 DATA_PATH = os.path.join('tests', 'data')
 SAMPLE_PATH = os.path.join(DATA_PATH, 'sample.xcf')
-
-def file_contents_match(src1, src2):
-    return open(src1, 'rb').read() == open(src2, 'rb').read()
-
-def run_xcf2atlas(args):
-    return subprocess.run([
-        './xcf2atlas.py',
-    ] + args).returncode
 
 def test_it_exports_image_and_json_files():
     check_img_path = os.path.join(DATA_PATH, 'sample-export-with-defaults', 'out.png')
