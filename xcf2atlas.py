@@ -40,7 +40,7 @@ def place_images(img_list, max_width, pad=1):
     for img in img_list:
         # Place the images horizontally until they won't fit anymore, then
         # skip down and start a new line.
-        if (x + pad + img.size[0] >= max_width):
+        if (max_width > 0 and x + pad + img.size[0] >= max_width):
             x = pad
             y += pad + line_height
             line_height = 0
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         dest='max_width',
         nargs=1,
         type=int,
-        default=[256]
+        default=[-1]
     )
     parser.add_argument('--export-image', dest='image_file', nargs=1, required=True)
     parser.add_argument('--export-json', dest='json_file', nargs=1, required=True)
