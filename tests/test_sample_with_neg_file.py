@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
 import tempfile
 import subprocess
 import os
@@ -26,12 +27,9 @@ from utils import (
 )
 
 DATA_PATH = os.path.join('tests', 'data')
-SAMPLE_PATH = os.path.join(DATA_PATH, 'sample.xcf')
+SAMPLE_PATH = os.path.join(DATA_PATH, 'sample-with-neg-pos.xcf')
 
-def test_it_exports_image_and_json_files():
-    check_img_path = os.path.join(DATA_PATH, 'sample-export-with-defaults', 'out.png')
-    check_json_path = os.path.join(DATA_PATH, 'sample-export-with-defaults', 'out.json')
-
+def test_it_exports_all_layers():
     with tempfile.TemporaryDirectory() as tmpdir:
         img_path = os.path.join(tmpdir, 'out.png')
         json_path = os.path.join(tmpdir, 'out.json')
@@ -46,12 +44,12 @@ def test_it_exports_image_and_json_files():
         assert os.path.exists(img_path)
         assert os.path.exists(json_path)
 
-        assert file_contents_match(img_path, check_img_path)
-        assert file_contents_match(json_path, check_json_path)
+        data = json.load(open(json_path))
+        assert len(data['frames']) == 2
 
-def test_it_wraps_output_image_given_max_width():
-    check_img_path = os.path.join(DATA_PATH, 'sample-export-with-max-width-40', 'out.png')
-    check_json_path = os.path.join(DATA_PATH, 'sample-export-with-max-width-40', 'out.json')
+def test_it_exports_matching_png_and_json_files():
+    check_img_path = os.path.join(DATA_PATH, 'sample-with-neg-pos-export-with-defaults', 'out.png')
+    check_json_path = os.path.join(DATA_PATH, 'sample-with-neg-pos-export-with-defaults', 'out.json')
 
     with tempfile.TemporaryDirectory() as tmpdir:
         img_path = os.path.join(tmpdir, 'out.png')
@@ -59,7 +57,6 @@ def test_it_wraps_output_image_given_max_width():
         ret = run_xcf2atlas([
             '--export-image', img_path,
             '--export-json', json_path,
-            '--max-width', str(40),
             SAMPLE_PATH,
         ])
 

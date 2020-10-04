@@ -32,7 +32,7 @@ def get_layer_info(src):
     (out, err) = proc.communicate()
     layers = []
     for line in out.decode('UTF-8').split('\n'):
-        m = re.match('^\+ (\d+)x(\d+)\+(\d+)\+(\d+) [^ ]* [^ ]* (.+)$', line)
+        m = re.match('^\+ (\d+)x(\d+)([\-\+]\d+)([\-\+]\d+) [^ ]* [^ ]* (.+)$', line)
         if (m):
             (w, h, x, y, name) = m.groups()
             layers.append(Layer(name, int(x), int(y), int(w), int(h)))
