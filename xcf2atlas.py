@@ -16,22 +16,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from dataclasses import dataclass
 import json
 import PIL
 import PIL.Image
 import sys
 import os
 import argparse
-from collections import namedtuple
 
 import xcftools
+
+
+@dataclass
+class PlacedImage:
+    img: PIL.Image
+    x: int
+    y: int
 
 
 def place_images(img_list, max_width, pad=1):
     '''Packs the list of images into a box, given it's maximum width, expanding
     the height as necessary to fit all images. This returns a list of placed
     images.'''
-    PlacedImage = namedtuple('PlacedImage', ('img', 'x', 'y'))
 
     x = pad
     y = pad
@@ -56,11 +62,15 @@ def place_images(img_list, max_width, pad=1):
     return placed_imgs, dest_width, dest_height
 
 
-def pack_images(img_list, max_width):
+def pack_images(layers, max_width):
     '''Pack the list of PIL images into a new image, being somewhat space
     efficient. This returns the new image, and a list of locations.'''
 
     # First decide on how to layout the images
+    img_list = [
+        layer.image
+        for layer in layers
+    ]
     placed_imgs, dest_width, dest_height = place_images(img_list, max_width)
 
     # Now paste everything into a big image map
@@ -86,34 +96,21 @@ def main():
     parser.add_argument('--export-json', dest='json_file', nargs=1, required=True)
     parser.add_argument('src', nargs='+')
     args = parser.parse_args(sys.argv[1:])
+    xcf2atlas(
+        src_paths=args.src,
+        dest_image_path=args.image_file[0],
+        dest_json_path=args.json_file[0],
+        max_width=args.max_width[0],
+    )
 
-    for src in args.src:
-        if not os.path.exists(src):
-            raise FileNotFoundError(src)
 
-    sprite_names = {}
-    all_layers = []
-    all_images = []
-    for src in args.src:
-        layers = xcftools.get_layer_info(src)
-        all_layers += layers
-        all_images += [
-            xcftools.extract_layer(src, layer.name)
-            for layer in layers
-        ]
-        base_name = os.path.splitext(os.path.basename(src))[0]
-        sprite_names.update({
-            layer : base_name + '_' + layer.name
-            for layer in layers
-        })
-
-    dest_json_path = args.json_file[0]
-    dest_image_path = args.image_file[0]
-
-    # Pack and save the image
-    dest_img, positions = pack_images(all_images, args.max_width[0])
-    dest_img.save(dest_image_path)
-
+def output_json(
+    dest_img,
+    all_layers,
+    positions,
+    dest_image_path,
+    dest_json_path,
+):
     # Write out the json
     json_data = {
         'meta' : {
@@ -128,7 +125,7 @@ def main():
             }
         },
         'frames' : {
-            sprite_names[layer] : {
+            f'{layer.base_name}_{layer.name}' : {
                 'frame' : {
                     'x' : pos[0],
                     'y' : pos[1],
@@ -149,7 +146,47 @@ def main():
             for layer, pos in zip(all_layers, positions)
         }
     }
-    json.dump(json_data, open(dest_json_path, 'w'), sort_keys=True)
+    with open(dest_json_path, 'w') as file:
+        json.dump(json_data, file, sort_keys=True)
+
+
+def xcf2atlas(
+    src_paths,
+    dest_image_path,
+    dest_json_path,
+    max_width,
+):
+    for src in src_paths:
+        if not os.path.exists(src):
+            raise FileNotFoundError(src)
+
+    sprite_names = {}
+    all_layers = []
+    all_images = []
+    for src in src_paths:
+        all_layers += xcftools.get_layer_info(src)
+        # all_layers += layers
+        # all_images += [
+        #     xcftools.extract_layer(src, layer.name)
+        #     for layer in layers
+        # ]
+        # base_name = os.path.splitext(os.path.basename(src))[0]
+        # sprite_names.update({
+        #     layer.name : base_name + '_' + layer.name
+        #     for layer in layers
+        # })
+
+    # Pack and save the image
+    dest_img, positions = pack_images(all_layers, max_width)
+    dest_img.save(dest_image_path)
+
+    output_json(
+        dest_img=dest_img,
+        all_layers=all_layers,
+        positions=positions,
+        dest_image_path=dest_image_path,
+        dest_json_path=dest_json_path,
+    )
 
 
 if __name__ == '__main__':

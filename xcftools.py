@@ -16,19 +16,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from dataclasses import dataclass
+import os
 import PIL
 import PIL.Image
-import io
 import subprocess
-from collections import namedtuple
 import re
 from gimpformats.gimpXcfDocument import GimpDocument
 
 
+@dataclass
+class Layer:
+    name: str
+    x: int
+    y: int
+    w: int
+    h: int
+    image: PIL.Image
+    base_name: str
+
+
 def get_layer_info(src):
     '''Returns a list of layers found in the XCF file.'''
-
-    Layer = namedtuple('Layer', ('name', 'x', 'y', 'w', 'h'))
 
     doc = GimpDocument(src)
     layers = []
@@ -39,14 +48,8 @@ def get_layer_info(src):
             y=layer.yOffset,
             w=layer.width,
             h=layer.height,
+            image=layer.image,
+            base_name=os.path.splitext(os.path.basename(src))[0],
         )
         layers.append(layer)
     return layers
-
-
-def extract_layer(src, layer_name):
-    doc = GimpDocument(src)
-    for layer in doc.layers:
-        if layer.name == layer_name:
-            return layer.image
-    raise ValueError(f'cannot find layer: {layer_name}')
