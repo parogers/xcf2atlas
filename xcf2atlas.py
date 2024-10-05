@@ -26,6 +26,7 @@ from collections import namedtuple
 
 import xcftools
 
+
 def place_images(img_list, max_width, pad=1):
     '''Packs the list of images into a box, given it's maximum width, expanding
     the height as necessary to fit all images. This returns a list of placed
@@ -51,9 +52,9 @@ def place_images(img_list, max_width, pad=1):
         dest_width = max(dest_width, x)
         line_height = max(line_height, img.size[1])
 
-    #dest_width += pad
     dest_height = y + pad + line_height
     return placed_imgs, dest_width, dest_height
+
 
 def pack_images(img_list, max_width):
     '''Pack the list of PIL images into a new image, being somewhat space
@@ -69,7 +70,8 @@ def pack_images(img_list, max_width):
 
     return dest_img, ((placed.x, placed.y) for placed in placed_imgs)
 
-if __name__ == '__main__':
+
+def main():
     parser = argparse.ArgumentParser(
         description='Build an image atlas from a collection of XCF files'
     )
@@ -148,3 +150,7 @@ if __name__ == '__main__':
         }
     }
     json.dump(json_data, open(dest_json_path, 'w'), sort_keys=True)
+
+
+if __name__ == '__main__':
+    main()

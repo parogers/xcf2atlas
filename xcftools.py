@@ -22,30 +22,31 @@ import io
 import subprocess
 from collections import namedtuple
 import re
+from gimpformats.gimpXcfDocument import GimpDocument
+
 
 def get_layer_info(src):
     '''Returns a list of layers found in the XCF file.'''
 
     Layer = namedtuple('Layer', ('name', 'x', 'y', 'w', 'h'))
 
-    proc = subprocess.Popen(['xcfinfo', src], stdout=subprocess.PIPE)
-    (out, err) = proc.communicate()
+    doc = GimpDocument(src)
     layers = []
-    for line in out.decode('UTF-8').split('\n'):
-        m = re.match('^\+ (\d+)x(\d+)([\-\+]\d+)([\-\+]\d+) [^ ]* [^ ]* (.+)$', line)
-        if (m):
-            (w, h, x, y, name) = m.groups()
-            layers.append(Layer(name, int(x), int(y), int(w), int(h)))
+    for layer in doc.layers:
+        layer = Layer(
+            name=layer.name,
+            x=layer.xOffset,
+            y=layer.yOffset,
+            w=layer.width,
+            h=layer.height,
+        )
+        layers.append(layer)
     return layers
 
-#def extract_layer_to_png(src, dest, layer_name):
-#    proc = subprocess.Popen(['xcf2png', src, layer_name, '-o', dest])
-#    proc.wait()
 
 def extract_layer(src, layer_name):
-    proc = subprocess.Popen(
-        ['xcf2png', '-C', src, layer_name],
-        stdout=subprocess.PIPE
-    )
-    out, err = proc.communicate()
-    return PIL.Image.open(io.BytesIO(out))
+    doc = GimpDocument(src)
+    for layer in doc.layers:
+        if layer.name == layer_name:
+            return layer.image
+    raise ValueError(f'cannot find layer: {layer_name}')
