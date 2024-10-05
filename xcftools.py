@@ -38,6 +38,10 @@ class Layer:
     is_group: bool
     layers: List['Layer']
 
+    @property
+    def sprite_name(self):
+        return f'{self.base_name}_{self.name}'
+
     def __getitem__(self, index):
         return self.layers[index]
 

@@ -25,7 +25,7 @@ import argparse
 import xcftools
 from output import (
     output_json,
-    output_sprites_json,
+    output_scene_json,
 )
 from packing import (
     pack_images,
@@ -36,7 +36,7 @@ def xcf2atlas(
     src_paths,
     dest_image_path,
     dest_json_path,
-    dest_sprites_path,
+    dest_scene_path,
     max_width,
     include_group_images,
 ):
@@ -64,10 +64,11 @@ def xcf2atlas(
         dest_json_path=dest_json_path,
     )
 
-    if dest_sprites_path:
-        output_sprites_json(
-            dest_sprites_path=dest_sprites_path,
+    if dest_scene_path:
+        output_scene_json(
+            dest_scene_path=dest_scene_path,
             layers=all_layers,
+            include_group_images=include_group_images,
         )
 
 
@@ -95,8 +96,8 @@ def main():
         required=True,
     )
     parser.add_argument(
-        '--export-sprites-json',
-        dest='sprites_file',
+        '--export-scene-json',
+        dest='scene_file',
         nargs=1,
         type=str,
         default=[''],
@@ -116,7 +117,7 @@ def main():
         src_paths=args.src,
         dest_image_path=args.image_file[0],
         dest_json_path=args.json_file[0],
-        dest_sprites_path=args.sprites_file[0],
+        dest_scene_path=args.scene_file[0],
         max_width=args.max_width[0],
         include_group_images=args.include_group_images[0],
     )

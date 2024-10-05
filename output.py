@@ -1,6 +1,7 @@
 
 import os
 import json
+import collections
 
 
 def output_json(
@@ -49,24 +50,42 @@ def output_json(
         json.dump(json_data, file, sort_keys=True)
 
 
-def output_sprites_json(
-    dest_sprites_path,
+def output_scene_json(
+    dest_scene_path,
     layers,
+    include_group_images=False,
 ):
     layers_by_file_name = collections.defaultdict(list)
     for layer in layers:
         layers_by_file_name[layer.base_name].append(layer)
+
+    def _get_layer_info(layer):
+        info = {
+            'name' : layer.name,
+        }
+        if include_group_images or not layer.is_group:
+            info = {
+                'sprite_name' : layer.sprite_name,
+                'x' : layer.x,
+                'y' : layer.y,
+                **info
+            }
+
+        if layer.layers:
+            info['layers'] = [
+                _get_layer_info(other)
+                for other in layer.layers
+            ]
+        return info
 
     json_data = {}
     for file_name in sorted(layers_by_file_name):
         json_data[file_name] = {
             'name' : file_name,
             'layers' : [
-                {
-                    'name' : layer.name
-                }
+                _get_layer_info(layer)
                 for layer in layers
             ],
         }
-    with open(dest_sprites_path, 'w') as file:
+    with open(dest_scene_path, 'w') as file:
         file.write(json.dumps(json_data, sort_keys=True, indent=4))
