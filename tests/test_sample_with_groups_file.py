@@ -3,6 +3,7 @@ import os
 import json
 import tempfile
 import pytest
+
 from utils import (
     run_xcf2atlas,
     file_contents_match,
