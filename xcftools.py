@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import List
 from dataclasses import dataclass
 import os
 import PIL
@@ -35,6 +36,10 @@ class Layer:
     image: PIL.Image
     base_name: str
     is_group: bool
+    layers: List['Layer']
+
+    def __getitem__(self, index):
+        return self.layers[index]
 
 
 def get_layer_info(src):
@@ -42,16 +47,28 @@ def get_layer_info(src):
 
     doc = GimpDocument(src)
     layers = []
-    for layer in doc.layers:
+    for gimp_layer in doc.layers:
         layer = Layer(
-            name=layer.name,
-            x=layer.xOffset,
-            y=layer.yOffset,
-            w=layer.width,
-            h=layer.height,
-            image=layer.image,
+            name=gimp_layer.name,
+            x=gimp_layer.xOffset,
+            y=gimp_layer.yOffset,
+            w=gimp_layer.width,
+            h=gimp_layer.height,
+            image=gimp_layer.image,
             base_name=os.path.splitext(os.path.basename(src))[0],
-            is_group=bool(layer.isGroup),
+            is_group=bool(gimp_layer.isGroup),
+            layers=[],
         )
-        layers.append(layer)
+
+        if gimp_layer.itemPath:
+            slice = layers
+            for path in gimp_layer.itemPath[:-1]:
+                slice = slice[path].layers
+            assert gimp_layer.itemPath[-1] == len(slice)
+            slice.append(layer)
+        else:
+            layers.append(layer)
+
+    # print(layers[1][1][0].name)
+
     return layers
