@@ -32,7 +32,7 @@ def test_it_exports_group_images():
         assert file_contents_match(json_path, check_json_path)
 
 
-def xtest_it_skips_group_images():
+def test_it_skips_group_images():
     check_img_path = os.path.join(DATA_PATH, 'sample-export-without-group-images', 'out.png')
     check_json_path = os.path.join(DATA_PATH, 'sample-export-without-group-images', 'out.json')
 

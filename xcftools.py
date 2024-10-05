@@ -69,6 +69,4 @@ def get_layer_info(src):
         else:
             layers.append(layer)
 
-    # print(layers[1][1][0].name)
-
     return layers

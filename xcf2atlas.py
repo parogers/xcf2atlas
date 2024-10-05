@@ -49,7 +49,11 @@ def xcf2atlas(
         all_layers += xcftools.get_layer_info(src)
 
     # Pack and save the image
-    dest_img, placed_imgs = pack_images(all_layers, max_width)
+    dest_img, placed_imgs = pack_images(
+        all_layers,
+        max_width,
+        include_group_images=include_group_images,
+    )
     dest_img.save(dest_image_path)
 
     output_json(
