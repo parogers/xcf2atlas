@@ -34,6 +34,7 @@ class Layer:
     h: int
     image: PIL.Image
     base_name: str
+    is_group: bool
 
 
 def get_layer_info(src):
@@ -50,6 +51,7 @@ def get_layer_info(src):
             h=layer.height,
             image=layer.image,
             base_name=os.path.splitext(os.path.basename(src))[0],
+            is_group=bool(layer.isGroup),
         )
         layers.append(layer)
     return layers

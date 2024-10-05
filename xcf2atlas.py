@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import collections
 from dataclasses import dataclass
 import json
 import PIL
@@ -92,15 +93,43 @@ def main():
         type=int,
         default=[-1]
     )
-    parser.add_argument('--export-image', dest='image_file', nargs=1, required=True)
-    parser.add_argument('--export-json', dest='json_file', nargs=1, required=True)
+    parser.add_argument(
+        '--export-image',
+        dest='image_file',
+        nargs=1,
+        required=True,
+    )
+    parser.add_argument(
+        '--export-json',
+        dest='json_file',
+        nargs=1,
+        required=True,
+    )
+    parser.add_argument(
+        '--export-sprites-json',
+        dest='sprites_file',
+        nargs=1,
+        type=str,
+        default=[''],
+    )
+    parser.add_argument(
+        '--include-group-images',
+        dest='include_group_images',
+        action='store_const',
+        const=[True],
+        default=[False],
+        help='Whether to include the image associated with a group in the output.',
+    )
     parser.add_argument('src', nargs='+')
+
     args = parser.parse_args(sys.argv[1:])
     xcf2atlas(
         src_paths=args.src,
         dest_image_path=args.image_file[0],
         dest_json_path=args.json_file[0],
+        dest_sprites_path=args.sprites_file[0],
         max_width=args.max_width[0],
+        include_group_images=args.include_group_images[0],
     )
 
 
@@ -150,31 +179,51 @@ def output_json(
         json.dump(json_data, file, sort_keys=True)
 
 
+def output_sprites_json(
+    dest_sprites_path,
+    layers,
+):
+    layers_by_file_name = collections.defaultdict(list)
+    for layer in layers:
+        layers_by_file_name[layer.base_name].append(layer)
+
+    json_data = {}
+    for file_name in sorted(layers_by_file_name):
+        json_data[file_name] = {
+            'name' : file_name,
+            'layers' : [
+                {
+                    'name' : layer.name
+                }
+                for layer in layers
+            ],
+        }
+    with open(dest_sprites_path, 'w') as file:
+        file.write(json.dumps(json_data, sort_keys=True))
+
+
 def xcf2atlas(
     src_paths,
     dest_image_path,
     dest_json_path,
+    dest_sprites_path,
     max_width,
+    include_group_images,
 ):
     for src in src_paths:
         if not os.path.exists(src):
             raise FileNotFoundError(src)
 
-    sprite_names = {}
     all_layers = []
-    all_images = []
     for src in src_paths:
         all_layers += xcftools.get_layer_info(src)
-        # all_layers += layers
-        # all_images += [
-        #     xcftools.extract_layer(src, layer.name)
-        #     for layer in layers
-        # ]
-        # base_name = os.path.splitext(os.path.basename(src))[0]
-        # sprite_names.update({
-        #     layer.name : base_name + '_' + layer.name
-        #     for layer in layers
-        # })
+
+    if not include_group_images:
+        all_layers = [
+            layer
+            for layer in all_layers
+            if not layer.is_group
+        ]
 
     # Pack and save the image
     dest_img, positions = pack_images(all_layers, max_width)
@@ -187,6 +236,12 @@ def xcf2atlas(
         dest_image_path=dest_image_path,
         dest_json_path=dest_json_path,
     )
+
+    if dest_sprites_path:
+        output_sprites_json(
+            dest_sprites_path=dest_sprites_path,
+            layers=all_layers,
+        )
 
 
 if __name__ == '__main__':

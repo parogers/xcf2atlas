@@ -14,4 +14,8 @@ You'll need the python [gimpformats](https://pypi.org/project/gimpformats/) modu
 
 ## Usage
 
+If you just want an image atlas:
+
+```
 xcf2atlas.py --export-image output.png --export-json output.json input.xcf
+```
